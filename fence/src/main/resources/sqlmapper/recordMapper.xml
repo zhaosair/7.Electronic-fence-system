@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.IRecordDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.RecordEntity">
+		insert into `record`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="uid != null">
+					uid,
+				</if>
+				<if test="lng != null">
+					lng,
+				</if>
+				<if test="lat != null">
+					lat,
+				</if>
+				<if test="creatime != null">
+					creatime,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="uid != null">
+					#{uid},
+				</if>
+				<if test="lng != null">
+					#{lng},
+				</if>
+				<if test="lat != null">
+					#{lat},
+				</if>
+				<if test="creatime != null">
+					#{creatime},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.RecordEntity">
+		delete from `record`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.RecordEntity">
+		update `record`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="uid != null">
+					uid=#{uid},
+				</if>
+				<if test="lng != null">
+					lng=#{lng},
+				</if>
+				<if test="lat != null">
+					lat=#{lat},
+				</if>
+				<if test="creatime != null">
+					creatime=#{creatime},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.RecordEntity"
+		resultType="fence.entity.RecordEntity">
+			select 
+				id as "id",
+				uid as "uid",
+				lng as "lng",
+				lat as "lat",
+				creatime as "creatime"
+			from `record`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="uid != null">
+						and uid=#{uid}
+					</if>
+					<if test="lng != null">
+						and lng=#{lng}
+					</if>
+					<if test="lat != null">
+						and lat=#{lat}
+					</if>
+					<if test="creatime != null">
+						and creatime=#{creatime}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="id != null and id != '' ">
+                and id <![CDATA[=]]> #{id}
+                </if>
+                <if test="uid != null and uid != '' ">
+                and uid <![CDATA[=]]> #{uid}
+                </if>
+                <if test="lng != null and lng != '' ">
+                and lng <![CDATA[=]]> #{lng}
+                </if>
+                <if test="lat != null and lat != '' ">
+                and lat <![CDATA[=]]> #{lat}
+                </if>
+                <if test="creatime != null and creatime != '' ">
+                and creatime <![CDATA[=]]> #{creatime}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.RecordEntity"
+		resultType="fence.entity.RecordEntity">
+			select
+				id as "id",
+				uid as "uid",
+				lng as "lng",
+				lat as "lat",
+				creatime as "creatime"
+
+                from `record`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.RecordEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `record`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>

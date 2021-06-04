@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.IWarnlogDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.WarnlogEntity">
+		insert into `warnlog`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="tid != null">
+					tid,
+				</if>
+				<if test="uid != null">
+					uid,
+				</if>
+				<if test="errortime != null">
+					errortime,
+				</if>
+				<if test="lng != null">
+					lng,
+				</if>
+				<if test="lat != null">
+					lat,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="tid != null">
+					#{tid},
+				</if>
+				<if test="uid != null">
+					#{uid},
+				</if>
+				<if test="errortime != null">
+					#{errortime},
+				</if>
+				<if test="lng != null">
+					#{lng},
+				</if>
+				<if test="lat != null">
+					#{lat},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.WarnlogEntity">
+		delete from `warnlog`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.WarnlogEntity">
+		update `warnlog`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="tid != null">
+					tid=#{tid},
+				</if>
+				<if test="uid != null">
+					uid=#{uid},
+				</if>
+				<if test="errortime != null">
+					errortime=#{errortime},
+				</if>
+				<if test="lng != null">
+					lng=#{lng},
+				</if>
+				<if test="lat != null">
+					lat=#{lat},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.WarnlogEntity"
+		resultType="fence.entity.WarnlogEntity">
+			select 
+				id as "id",
+				tid as "tid",
+				uid as "uid",
+				errortime as "errortime",
+				lng as "lng",
+				lat as "lat"
+			from `warnlog`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="tid != null">
+						and tid=#{tid}
+					</if>
+					<if test="uid != null">
+						and uid=#{uid}
+					</if>
+					<if test="errortime != null">
+						and errortime=#{errortime}
+					</if>
+					<if test="lng != null">
+						and lng=#{lng}
+					</if>
+					<if test="lat != null">
+						and lat=#{lat}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="uid != null and uid != '' ">
+                and uid <![CDATA[=]]> #{uid}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.WarnlogEntity"
+		resultType="fence.entity.WarnlogEntity">
+			select
+				id as "id",
+				tid as "tid",
+				uid as "uid",
+				errortime as "errortime",
+				lng as "lng",
+				lat as "lat"
+
+                from `warnlog`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.WarnlogEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `warnlog`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>

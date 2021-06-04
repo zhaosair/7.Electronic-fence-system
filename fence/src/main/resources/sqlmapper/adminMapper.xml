@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.IAdminDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.AdminEntity">
+		insert into `admin`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="login != null">
+					login,
+				</if>
+				<if test="passwd != null">
+					passwd,
+				</if>
+				<if test="role != null">
+					role,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="login != null">
+					#{login},
+				</if>
+				<if test="passwd != null">
+					#{passwd},
+				</if>
+				<if test="role != null">
+					#{role},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.AdminEntity">
+		delete from `admin`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.AdminEntity">
+		update `admin`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="login != null">
+					login=#{login},
+				</if>
+				<if test="passwd != null">
+					passwd=#{passwd},
+				</if>
+				<if test="role != null">
+					role=#{role},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.AdminEntity"
+		resultType="fence.entity.AdminEntity">
+			select 
+				id as "id",
+				login as "login",
+				passwd as "passwd",
+				role as "role"
+			from `admin`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="login != null">
+						and login=#{login}
+					</if>
+					<if test="passwd != null">
+						and passwd=#{passwd}
+					</if>
+					<if test="role != null">
+						and role=#{role}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="id != null and id != '' ">
+                and id <![CDATA[=]]> #{id}
+                </if>
+                <if test="login != null and login != '' ">
+                and login <![CDATA[=]]> #{login}
+                </if>
+                <if test="passwd != null and passwd != '' ">
+                and passwd <![CDATA[=]]> #{passwd}
+                </if>
+                <if test="role != null and role != '' ">
+                and role <![CDATA[=]]> #{role}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.AdminEntity"
+		resultType="fence.entity.AdminEntity">
+			select
+				id as "id",
+				login as "login",
+				passwd as "passwd",
+				role as "role"
+
+                from `admin`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.AdminEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `admin`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>

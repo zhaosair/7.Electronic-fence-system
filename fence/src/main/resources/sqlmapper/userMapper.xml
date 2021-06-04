@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.IUserDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.UserEntity">
+		insert into `user`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="login != null">
+					login,
+				</if>
+				<if test="name != null">
+					name,
+				</if>
+				<if test="passwd != null">
+					passwd,
+				</if>
+				<if test="sex != null">
+					sex,
+				</if>
+				<if test="phone != null">
+					phone,
+				</if>
+				<if test="birthday != null">
+					birthday,
+				</if>
+				<if test="logintime != null">
+					logintime,
+				</if>
+				<if test="logoutime != null">
+					logoutime,
+				</if>
+				<if test="status != null">
+					status,
+				</if>
+				<if test="dpid != null">
+					dpid,
+				</if>
+				<if test="lng != null">
+					lng,
+				</if>
+				<if test="lat != null">
+					lat,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="login != null">
+					#{login},
+				</if>
+				<if test="name != null">
+					#{name},
+				</if>
+				<if test="passwd != null">
+					#{passwd},
+				</if>
+				<if test="sex != null">
+					#{sex},
+				</if>
+				<if test="phone != null">
+					#{phone},
+				</if>
+				<if test="birthday != null">
+					#{birthday},
+				</if>
+				<if test="logintime != null">
+					#{logintime},
+				</if>
+				<if test="logoutime != null">
+					#{logoutime},
+				</if>
+				<if test="status != null">
+					#{status},
+				</if>
+				<if test="dpid != null">
+					#{dpid},
+				</if>
+				<if test="lng != null">
+					#{lng},
+				</if>
+				<if test="lat != null">
+					#{lat},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.UserEntity">
+		delete from `user`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.UserEntity">
+		update `user`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="login != null">
+					login=#{login},
+				</if>
+				<if test="name != null">
+					name=#{name},
+				</if>
+				<if test="passwd != null">
+					passwd=#{passwd},
+				</if>
+				<if test="sex != null">
+					sex=#{sex},
+				</if>
+				<if test="phone != null">
+					phone=#{phone},
+				</if>
+				<if test="birthday != null">
+					birthday=#{birthday},
+				</if>
+				<if test="logintime != null">
+					logintime=#{logintime},
+				</if>
+				<if test="logoutime != null">
+					logoutime=#{logoutime},
+				</if>
+				<if test="status != null">
+					status=#{status},
+				</if>
+				<if test="dpid != null">
+					dpid=#{dpid},
+				</if>
+				<if test="lng != null">
+					lng=#{lng},
+				</if>
+				<if test="lat != null">
+					lat=#{lat},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.UserEntity"
+		resultType="fence.entity.UserEntity">
+			select 
+				id as "id",
+				login as "login",
+				name as "name",
+				passwd as "passwd",
+				sex as "sex",
+				phone as "phone",
+				birthday as "birthday",
+				logintime as "logintime",
+				logoutime as "logoutime",
+				status as "status",
+				dpid as "dpid",
+				lng as "lng",
+				lat as "lat"
+			from `user`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="login != null">
+						and login=#{login}
+					</if>
+					<if test="name != null">
+						and name=#{name}
+					</if>
+					<if test="passwd != null">
+						and passwd=#{passwd}
+					</if>
+					<if test="sex != null">
+						and sex=#{sex}
+					</if>
+					<if test="phone != null">
+						and phone=#{phone}
+					</if>
+					<if test="birthday != null">
+						and birthday=#{birthday}
+					</if>
+					<if test="logintime != null">
+						and logintime=#{logintime}
+					</if>
+					<if test="logoutime != null">
+						and logoutime=#{logoutime}
+					</if>
+					<if test="status != null">
+						and status=#{status}
+					</if>
+					<if test="dpid != null">
+						and dpid=#{dpid}
+					</if>
+					<if test="lng != null">
+						and lng=#{lng}
+					</if>
+					<if test="lat != null">
+						and lat=#{lat}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="name != null and name != '' ">
+                and name <![CDATA[=]]> #{name}
+                </if>
+                <if test="status != null and status != '' ">
+                and status <![CDATA[=]]> #{status}
+                </if>
+                <if test="dpid != null and dpid != '' ">
+                and dpid <![CDATA[=]]> #{dpid}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.UserEntity"
+		resultType="fence.entity.UserEntity">
+			select
+				id as "id",
+				login as "login",
+				name as "name",
+				passwd as "passwd",
+				sex as "sex",
+				phone as "phone",
+				birthday as "birthday",
+				logintime as "logintime",
+				logoutime as "logoutime",
+				status as "status",
+				dpid as "dpid",
+				lng as "lng",
+				lat as "lat"
+
+                from `user`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.UserEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `user`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>

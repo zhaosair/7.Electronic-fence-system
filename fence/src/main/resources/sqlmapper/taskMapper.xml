@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.ITaskDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.TaskEntity">
+		insert into `task`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="name != null">
+					name,
+				</if>
+				<if test="uid != null">
+					uid,
+				</if>
+				<if test="rid != null">
+					rid,
+				</if>
+				<if test="creatime != null">
+					creatime,
+				</if>
+				<if test="startime != null">
+					startime,
+				</if>
+				<if test="endtime != null">
+					endtime,
+				</if>
+				<if test="finishtime != null">
+					finishtime,
+				</if>
+				<if test="status != null">
+					status,
+				</if>
+				<if test="startlng != null">
+					startlng,
+				</if>
+				<if test="startlat != null">
+					startlat,
+				</if>
+				<if test="endlng != null">
+					endlng,
+				</if>
+				<if test="endlat != null">
+					endlat,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="name != null">
+					#{name},
+				</if>
+				<if test="uid != null">
+					#{uid},
+				</if>
+				<if test="rid != null">
+					#{rid},
+				</if>
+				<if test="creatime != null">
+					#{creatime},
+				</if>
+				<if test="startime != null">
+					#{startime},
+				</if>
+				<if test="endtime != null">
+					#{endtime},
+				</if>
+				<if test="finishtime != null">
+					#{finishtime},
+				</if>
+				<if test="status != null">
+					#{status},
+				</if>
+				<if test="startlng != null">
+					#{startlng},
+				</if>
+				<if test="startlat != null">
+					#{startlat},
+				</if>
+				<if test="endlng != null">
+					#{endlng},
+				</if>
+				<if test="endlat != null">
+					#{endlat},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.TaskEntity">
+		delete from `task`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.TaskEntity">
+		update `task`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="name != null">
+					name=#{name},
+				</if>
+				<if test="uid != null">
+					uid=#{uid},
+				</if>
+				<if test="rid != null">
+					rid=#{rid},
+				</if>
+				<if test="creatime != null">
+					creatime=#{creatime},
+				</if>
+				<if test="startime != null">
+					startime=#{startime},
+				</if>
+				<if test="endtime != null">
+					endtime=#{endtime},
+				</if>
+				<if test="finishtime != null">
+					finishtime=#{finishtime},
+				</if>
+				<if test="status != null">
+					status=#{status},
+				</if>
+				<if test="startlng != null">
+					startlng=#{startlng},
+				</if>
+				<if test="startlat != null">
+					startlat=#{startlat},
+				</if>
+				<if test="endlng != null">
+					endlng=#{endlng},
+				</if>
+				<if test="endlat != null">
+					endlat=#{endlat},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.TaskEntity"
+		resultType="fence.entity.TaskEntity">
+			select 
+				id as "id",
+				name as "name",
+				uid as "uid",
+				rid as "rid",
+				creatime as "creatime",
+				startime as "startime",
+				endtime as "endtime",
+				finishtime as "finishtime",
+				status as "status",
+				startlng as "startlng",
+				startlat as "startlat",
+				endlng as "endlng",
+				endlat as "endlat"
+			from `task`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="name != null">
+						and name=#{name}
+					</if>
+					<if test="uid != null">
+						and uid=#{uid}
+					</if>
+					<if test="rid != null">
+						and rid=#{rid}
+					</if>
+					<if test="creatime != null">
+						and creatime=#{creatime}
+					</if>
+					<if test="startime != null">
+						and startime=#{startime}
+					</if>
+					<if test="endtime != null">
+						and endtime=#{endtime}
+					</if>
+					<if test="finishtime != null">
+						and finishtime=#{finishtime}
+					</if>
+					<if test="status != null">
+						and status=#{status}
+					</if>
+					<if test="startlng != null">
+						and startlng=#{startlng}
+					</if>
+					<if test="startlat != null">
+						and startlat=#{startlat}
+					</if>
+					<if test="endlng != null">
+						and endlng=#{endlng}
+					</if>
+					<if test="endlat != null">
+						and endlat=#{endlat}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="uid != null and uid != '' ">
+                and uid <![CDATA[=]]> #{uid}
+                </if>
+                <if test="rid != null and rid != '' ">
+                and rid <![CDATA[=]]> #{rid}
+                </if>
+                <if test="status != null and status != '' ">
+                and status <![CDATA[=]]> #{status}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.TaskEntity"
+		resultType="fence.entity.TaskEntity">
+			select
+				id as "id",
+				name as "name",
+				uid as "uid",
+				rid as "rid",
+				creatime as "creatime",
+				startime as "startime",
+				endtime as "endtime",
+				finishtime as "finishtime",
+				status as "status",
+				startlng as "startlng",
+				startlat as "startlat",
+				endlng as "endlng",
+				endlat as "endlat"
+
+                from `task`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.TaskEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `task`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>

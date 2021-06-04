@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="fence.dao.IDeptmentDao">
+
+    <!--添加-->
+	<insert id="add" parameterType="fence.entity.DeptmentEntity">
+		insert into `deptment`
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					id,
+				</if>
+				<if test="name != null">
+					name,
+				</if>
+				<if test="regoin != null">
+					regoin,
+				</if>
+				<if test="status != null">
+					status,
+				</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="id != null">
+					#{id},
+				</if>
+				<if test="name != null">
+					#{name},
+				</if>
+				<if test="regoin != null">
+					#{regoin},
+				</if>
+				<if test="status != null">
+					#{status},
+				</if>
+		</trim>
+	</insert>
+
+    <!--删除-->
+	<delete id="delete" parameterType="fence.entity.DeptmentEntity">
+		delete from `deptment`
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</delete>
+
+    <!--更新-->
+	<update id="update" parameterType="fence.entity.DeptmentEntity">
+		update `deptment`
+		<trim prefix="set" suffixOverrides=",">
+				<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="name != null">
+					name=#{name},
+				</if>
+				<if test="regoin != null">
+					regoin=#{regoin},
+				</if>
+				<if test="status != null">
+					status=#{status},
+				</if>
+		</trim>
+		<where>
+            <if test="id != null">
+                and id=#{id}
+            </if>
+            <if test="id == null">
+                and 1 = 0
+            </if>
+		</where>
+	</update>
+
+    <!--固定条件查询-->
+	<select id="select" parameterType="fence.entity.DeptmentEntity"
+		resultType="fence.entity.DeptmentEntity">
+			select 
+				id as "id",
+				name as "name",
+				regoin as "regoin",
+				status as "status"
+			from `deptment`
+			<where>
+					<if test="id != null">
+						and id=#{id}
+					</if>
+					<if test="name != null">
+						and name=#{name}
+					</if>
+					<if test="regoin != null">
+						and regoin=#{regoin}
+					</if>
+					<if test="status != null">
+						and status=#{status}
+					</if>
+			</where>
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊查询的公共条件）-->
+    <sql id="likeSelectConditions">
+                <if test="id != null and id != '' ">
+                and id <![CDATA[=]]> #{id}
+                </if>
+                <if test="name != null and name != '' ">
+                and name <![CDATA[=]]> #{name}
+                </if>
+                <if test="regoin != null and regoin != '' ">
+                and regoin <![CDATA[=]]> #{regoin}
+                </if>
+                <if test="status != null and status != '' ">
+                and status <![CDATA[=]]> #{status}
+                </if>
+    </sql>
+
+    <!--分页（模糊）查询-->
+	<select id="likeSelect" parameterType="fence.entity.DeptmentEntity"
+		resultType="fence.entity.DeptmentEntity">
+			select
+				id as "id",
+				name as "name",
+				regoin as "regoin",
+				status as "status"
+
+                from `deptment`
+			
+			<where>
+                <include refid="likeSelectConditions"/>
+			</where>
+			
+			<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+			</if>
+            <if test="start != null and pageSize != null">
+                limit #{start},#{pageSize}
+            </if>
+		
+		
+	</select>
+
+    <!--分页（模糊）查询条数-->
+	<select id="likeSelectCount" parameterType="fence.entity.DeptmentEntity"
+		resultType="java.lang.Long">
+		select 
+			count(1)
+		from `deptment`
+		
+		<where>
+            <include refid="likeSelectConditions"/>
+		</where>
+	</select>
+	
+</mapper>
