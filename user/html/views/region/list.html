@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fence</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link href="../../css/bootstrap.min-custom.css" rel="stylesheet">
+    <link href="../../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../../css/animate.css" rel="stylesheet">
+    <link href="../../css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="../../css/plugins/pageMe/pageMe.css" rel="stylesheet"/>
+    <link href="../../css/plugins/progressbar/mprogress.css" rel="stylesheet"/>
+    <link href="../../css/plugins/progressbar/style.css" rel="stylesheet"/>
+	<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=56qAN0woZGi81AtWMEmbZh8h8xpBuHYw"></script>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h5>区域线路表管理</h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row row-lg">
+                <div class="clearfix hidden-xs"></div>
+                <div class="col-sm-12">
+                    <!-- Example Checkbox Select -->
+                    <div class="example-wrap">
+
+                        <!-- 查询区域 -->
+                        <div id="queryModel">
+                            <input type="text" v-model="id" placeholder="id" style="margin-top: 10px"/>&nbsp;
+                            <input type="text" v-model="name" placeholder="名称" style="margin-top: 10px"/>&nbsp;
+                            <input type="text" v-model="type" placeholder="类型" style="margin-top: 10px"/>&nbsp;
+                            <input type="text" v-model="color" placeholder="颜色代码" style="margin-top: 10px"/>&nbsp;
+                            <input type="text" v-model="status" placeholder="状态" style="margin-top: 10px"/>&nbsp;
+                            <button type="button" class="btn btn-primary btn-sm" @click="queryInfo()">查询</button>&nbsp;
+                        </div>
+                        <!-- 查询区域 end-->
+
+                        <!-- 添加数据区域 -->
+                        <div style="text-align: right;">
+                            <a class="btn btn-success btn-sm" href="../map/region.html" style="margin: 8px">新建区域</a>
+                        </div>
+
+                        <!-- 查询结果表格显示区域 -->
+                        <div id="newsContent" class="table-responsive" style="overflow: scroll;" v-cloak>
+                            <table class="table table-hover table-bordered text-nowrap">
+                                <tr>
+                                    <th>操作</th>
+                                    <th>id</th>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>颜色代码</th>
+                                    <th>状态</th>
+									<th>预览</th>
+                                </tr>
+                                <tbody id="dataTable">
+                                <tr v-for="data in result">
+                                    <td>
+                                        <button type="button" class="btn btn-info btn-sm"
+                                                @click="upMsg(data.id,'/region/select')">更新
+                                        </button>&nbsp;
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                @click="delMsg(data.id,'/region/delete')">删除
+                                        </button>&nbsp;
+                                    </td>
+                                    <td>{{data.id}}</td>
+                                    <td>{{data.name}}</td>
+                                    <td>{{data.type}}</td>
+                                    <td>{{data.color}}</td>
+                                    <td>{{data.status}}</td>
+									<td><button type="button" class="btn btn-success btn-sm"
+											@click="openMap(data.id)">查看</button>&nbsp;</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div id="pageID" class="page_div"></div>
+                        </div>
+                        <!-- 查询结果表格显示区域 end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改模态框 -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="updateModalLabel">修改信息</h4>
+            </div>
+            <div class="modal-body" id="updateModalBody">
+                <form>
+                    <div class="form-group">
+                        <label for="id-attr" class="control-label">id:</label>
+                        <input type="text" class="form-control" id="id-attr" v-model="id" readonly/>
+                    </div>
+                    <div class="form-group">
+                        <label for="name-attr" class="control-label">名称:</label>
+                        <input type="text" class="form-control" id="name-attr" v-model="name"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="type-attr" class="control-label">类型:</label>
+                        <input type="text" class="form-control" id="type-attr" v-model="type"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="color-attr" class="control-label">颜色代码:</label>
+                        <input type="text" class="form-control" id="color-attr" v-model="color"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-attr" class="control-label">状态:</label>
+                        <input type="text" class="form-control" id="status-attr" v-model="status"/>
+                    </div>
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="id-attr" v-model="id"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @click="confirmUp()">确认</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="regionModal" tabindex="-1" role="dialog" aria-labelledby="regionModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content" style="width: 700px;height: 600px">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" >查看区域</h4>
+			</div>
+			<div class="modal-body" id="regionMap" style="width: 100%;height: 580px;">
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 全局js -->
+<script src="../../js/jquery.min.js?v=2.1.4"></script>
+<script src="../../js/bootstrap.min.js?v=3.3.6"></script>
+<!-- 自定义js -->
+<script src="../../js/content.js?v=1.0.0"></script>
+<!-- Bootstrap table -->
+<script src="../../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+<!-- Peity -->
+<!-- <script src="../../js/demo/bootstrap-table-demo.js"></script> -->
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/util/ajaxFactory.js"></script>
+<script src="../../js/util/crudVueFactory.js"></script>
+<script src="../../js/util/pageMe.js"></script>
+<script src="../../js/config/config.js"></script>
+<script src="../../js/plugins/layer/layer.min.js"></script>
+<script src="../../js/plugins/progressbar/init-mprogress.js"></script>
+<script src="../../js/plugins/progressbar/mprogress.js"></script>
+<script>
+
+
+    //地图初始化
+    var bm = new BMap.Map("regionMap");
+    bm.centerAndZoom("韶关",14);
+    bm.addControl(new BMap.NavigationControl());
+    //bm.enableScrollWheelZoom(false);
+    bm.enableInertialDragging();
+    // 定义一个控件类,即function
+    ZoomControl = function () {
+        // 默认停靠位置和偏移量
+        this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
+        this.defaultOffset = new BMap.Size(80, 20);
+    };
+    ZoomControl.prototype = new BMap.Control();
+
+
+    //覆盖物列表
+    var overlays = [];
+    //--------------------------右键菜单方法---------------------------
+    //删除动作方法
+    removeMarker = function (e, ee, marker) {
+        bm.removeOverlay(marker);//地图删除覆盖物
+        delPoint(overlays, marker);//覆盖物列表删除此覆盖物
+    };
+    //坐标检测方法
+    checkMarker = function (e, ee, marker) {
+        var lon = marker.getPosition().lng;
+        var lat = marker.getPosition().lat;
+        checkPointIn(lon, lat);
+    };
+
+    //todo--------添加标注
+    addLabel = function (e, ee, marker) {
+
+    };
+    //右键菜单
+    getMenu = function (rectangle) {
+        const markerMenu = new BMap.ContextMenu();
+        markerMenu.addItem(new BMap.MenuItem('删除区域', removeMarker.bind(rectangle)));//为菜单绑定事件
+        markerMenu.addItem(new BMap.MenuItem('开始编辑', beginEdit.bind(rectangle)));//为菜单绑定事件
+        markerMenu.addItem(new BMap.MenuItem('结束编辑', endEdit.bind(rectangle)));//为菜单绑定事件
+        return markerMenu;
+    };
+    //为覆盖物绑定方法
+    overlaycomplete = function (e) {
+        var p = e.drawingMode;//获取覆盖物的属性
+
+        if (overlays.length == 1) {
+            alert("单次只能添加1个区域!");
+            bm.removeOverlay(e.overlay);
+            return;
+        }
+
+        if (p == 'marker') {//是否是点
+            var markerMenu = new BMap.ContextMenu();//生成右键菜单
+            markerMenu.addItem(new BMap.MenuItem('检测此点坐标', checkMarker.bind(e.overlay)));//为菜单绑定事件
+            markerMenu.addItem(new BMap.MenuItem('删除', removeMarker.bind(e.overlay)));//为菜单绑定事件
+            e.overlay.addContextMenu(markerMenu);//覆盖物绑定菜单
+        } else if (p == 'circle') { // 圆
+            var r = e.overlay.getRadius();
+            if (r > 1000 * 10) {
+                $.fn.alert("半径不能超过10千米");
+                bm.removeOverlay(e.overlay);
+                return;
+
+            } else if (r < 5) { // 半径小于5米认为图形无效
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+
+        } else if (p == 'rectangle') { // 矩形
+
+            // 如果两点重合则视为无效
+            if (JSON.stringify(e.overlay.getPath()[0]) == JSON.stringify(e.overlay.getPath()[1])) {
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+
+        } else { // 多边形
+            if (e.overlay.getPath().length > 30) {//多边形边数限制
+                $.fn.alert("多边形最大不能超过30条边!");
+                bm.removeOverlay(e.overlay);
+                return;
+            } else if (e.overlay.getPath().length < 3) {
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+        }
+    };
+
+    //图形样式
+    var styleOptions = {
+        strokeColor:"red",    //边线颜色。
+        //fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    }
+    //清除所有覆盖物
+    function clearAll() {
+        for(var i = 0; i < overlays.length; i++){
+            bm.removeOverlay(overlays[i]);//循环清除
+        }
+        overlays.length = 0;
+    }
+
+    function setZoom(points) {
+        if (points.length > 0) {
+            var maxLng = points[0].lng; //最大最小经纬度赋值
+            var minLng = points[0].lng;
+            var maxLat = points[0].lat;
+            var minLat = points[0].lat;
+            var res;
+            var convertor = new BMap.Convertor();
+            for (var i = points.length - 1; i >= 0; i--) {
+                res = points[i];
+                if (res.lng > maxLng) maxLng = res.lng; //取最大经度
+                if (res.lng < minLng) minLng = res.lng; //取最小经度
+                if (res.lat > maxLat) maxLat = res.lat; //取最大纬度
+                if (res.lat < minLat) minLat = res.lat; //取最小纬度
+            };
+            var cenLng = (parseFloat(maxLng) + parseFloat(minLng)) / 2; //通过最大最小经纬度取中心点
+            var cenLat = (parseFloat(maxLat) + parseFloat(minLat)) / 2;
+            var zoom = getZoom(maxLng, minLng, maxLat, minLat); //取缩放比例
+            // map.centerAndZoom(new BMap.Point(cenLng, cenLat), zoom); //设置中心点以及缩放比例
+            var point = new BMap.Point(cenLng , cenLat);  // 创建点坐标
+            bm.centerAndZoom(point, zoom);
+            //convertor.translate(point,0,zoom,translateCallback);     //真实经纬度转成百度坐标,解决偏移问题！！！这是重点
+        } else {
+            //没有坐标，显示全中国
+            bm.centerAndZoom(new BMap.Point(103.388611, 35.563611), 6);
+        }
+    }
+
+    //根据经纬极值计算绽放级别。
+    function getZoom(maxLng, minLng, maxLat, minLat) {
+        var zoom = ["50", "100", "200", "500", "1000", "2000", "5000", "10000", "20000", "25000", "50000", "100000",
+            "200000", "500000", "1000000", "2000000"
+        ] //级别18到3。
+        var pointA = new BMap.Point(maxLng, maxLat); // 创建点坐标A
+        var pointB = new BMap.Point(minLng, minLat); // 创建点坐标B
+        var distance = bm.getDistance(pointA, pointB).toFixed(1); //获取两点距离,保留小数点后两位
+        for (var i = 0, zoomLen = zoom.length; i < zoomLen; i++) {
+            if (zoom[i] - distance > 0) {
+                return 18 - i + 3; //之所以会多3，是因为地图范围常常是比例尺距离的10倍以上。所以级别会增加3。
+            }
+        };
+    }
+    //坐标转换完之后的回调函数
+    function translateCallback(point1,zoom){
+        bm.centerAndZoom(point1, zoom); //设置中心点以及缩放比例
+    }
+
+
+</script>
+<script>
+    var currentPage = 1;
+    var totalPage;
+    var sqlMap = {};
+    //排序的数据
+    var orderData = [];
+    var controllerPrefix = "region";
+    var methodName = "likeSelect";
+
+    var queryVue = new Vue({
+        el: '#queryModel',
+        data: {
+            id: '',
+            name: '',
+            type: '',
+            color: '',
+            status: ''
+        },
+        methods: {
+            queryInfo: function () {
+                sqlMap = {};
+                sqlMap.id = this.id;
+                sqlMap.name = this.name;
+                sqlMap.type = this.type;
+                sqlMap.color = this.color;
+                sqlMap.status = this.status;
+                currentPage = 1;
+                orderData = [];
+                $crud.getDataByCurrentPage();
+            },
+            exportExcel: function () {
+
+                //显示进度条
+                InitMprogress();
+
+                var param = '';
+
+                for (var key in sqlMap) {
+                    if (sqlMap[key] != '') {
+                        param += key + "=" + sqlMap[key] + "&";
+                    }
+                }
+
+                window.location.href = basePath + "/" + controllerPrefix
+                    + "/exportExcel?" + param;
+                // 进度条消失
+                setTimeout("MprogressEnd()", totalPage / 20 * 1000);
+            }
+        }
+
+    });
+
+    function makeResult(data) {
+        for (var i = 0; i < data.length; i++) {
+            if (data[i] == null) {
+                data[i] = {};
+                data[i]["id"] = "无";
+                data[i]["name"] = "无";
+                data[i]["type"] = "无";
+                data[i]["color"] = "无";
+                data[i]["status"] = "无";
+            }
+        }
+    }
+
+    var tableVue = new Vue({
+        el: '#newsContent',
+        data: {
+            result: []
+        },
+        //created:
+        mounted: function () {
+            $crud.getDataByCurrentPage();
+        },
+        methods: {
+
+            upMsg: function (id, path) {
+
+                $z.ajaxStrAndJson({
+                    url: basePath + path,
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        $z.dealCommonResult(data, function () {
+                            data = data.data;
+                            upVue.id = data[0]["id"];
+                            upVue.id = data[0]["id"];
+                            upVue.name = data[0]["name"];
+                            upVue.type = data[0]["type"];
+                            upVue.color = data[0]["color"];
+                            upVue.status = data[0]["status"];
+                            $('#updateModal').modal('show');
+                        });
+                    }
+                });
+            },
+            delMsg: function (id, path) {
+                layer.confirm("<em style='color:black'>" + '执行删除后将无法恢复，确定继续吗？' + "</em>", {
+                    icon: 3,
+                    offset: "200px",
+                    title: '温馨提示'
+                }, function (index) {
+                    //do something
+                    $z.ajaxStrAndJson({
+                        url: basePath + path,
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            $z.dealCommonResult(data, function () {
+                                $crud.getDataByCurrentPage();
+                                layer.alert("<em style='color:black'>" + "删除成功！" + "</em>", {
+                                    icon: 6,
+                                    offset: "200px",
+                                    title: '提示'
+                                });
+                            });
+                        }
+                    });
+                    layer.close(index);
+                });
+            },
+            openMap:function (id) {
+
+                clearAll();
+				$z.ajaxStrAndJson({
+					url: basePath + "/archor/select",
+					data: {
+						rid: id
+					},
+					success:function (data) {
+                        $('#regionModal').modal('show');
+						let markers=[];
+                        data = data.data;
+						for(var i = 0; i < data.length; i++){
+							markers.push(new BMap.Point(data[i].lng,data[i].lat));
+						}
+
+						rectangle = new BMap.Polygon(markers, styleOptions);  //创建矩形
+                        //地图添加矩形
+                        bm.addOverlay(rectangle);
+                        //覆盖物列表添加此覆盖物
+                        overlays.push(rectangle);
+                        setTimeout(function () {
+                            setZoom(data);
+                        },300)
+
+
+					}
+				});
+			}
+        }
+    });
+
+    var upVue = new Vue({
+        el: "#updateModal",
+        data: {
+            id: '',
+            name: '',
+            type: '',
+            color: '',
+            status: ''
+        },
+        methods: {
+            confirmUp: function () {
+                $z.ajaxStrAndJson({
+                    url: basePath + "/" + controllerPrefix + "/update",
+                    data: {
+                        id: this.id,
+                        name: this.name,
+                        type: this.type,
+                        color: this.color,
+                        status: this.status
+                    },
+                    success: function (data) {
+                        $z.dealCommonResult(data, function () {
+                            layer.alert("<em style='color:black'>" + "更新成功！" + "</em>", {
+                                icon: 6,
+                                offset: "200px",
+                                title: '提示'
+                            });
+                            $('#updateModal').modal('hide');
+                            $crud.getDataByCurrentPage();
+                        });
+
+                    }
+                });
+            }
+        }
+    });
+
+    function addMsg() {
+        $('#addModal').modal('show');
+    }
+
+    var addVue = new Vue({
+
+        el: "#addModal",
+        data: {
+            id: '',
+            name: '',
+            type: '',
+            color: '',
+            status: ''
+        },
+        methods: {
+            confirmAdd: function () {
+                $z.ajaxStrAndJson({
+                    url: basePath + "/" + controllerPrefix + "/add",
+                    data: {
+                        id: this.id,
+                        name: this.name,
+                        type: this.type,
+                        color: this.color,
+                        status: this.status
+                    },
+                    success: function (data) {
+                        $z.dealCommonResult(data, function () {
+                            layer.alert("<em style='color:black'>" + "添加成功！" + "</em>", {
+                                icon: 6,
+                                offset: "200px",
+                                title: '提示'
+                            });
+                            $('#addModal').modal('hide');
+                            //初始化
+                            sqlMap = {};
+                            currentPage = 1;
+                            $crud.getDataByCurrentPage();
+                        });
+
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+
+</body>
+</html>

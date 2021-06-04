@@ -1,0 +1,110 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fence</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link href="../../css/bootstrap.min-custom.css" rel="stylesheet">
+    <link href="../../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../../css/animate.css" rel="stylesheet">
+    <link href="../../css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="../../css/plugins/pageMe/pageMe.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/mprogress.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/style.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=56qAN0woZGi81AtWMEmbZh8h8xpBuHYw"></script>
+    <!--加载鼠标绘制工具-->
+    <script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h5>地图中心</h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row row-lg">
+                <div class="clearfix hidden-xs"></div>
+                <div class="col-sm-12">
+                    <div class="example-wrap" >
+                        <div id="queryModel">
+                            <h4>路线定制:</h4>
+                        </div>
+                        <div id="allmap" style="width:100%;height:500px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<!-- 全局js -->
+<script src="../../js/jquery.min.js?v=2.1.4"></script>
+<script src="../../js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="../../js/content.js?v=1.0.0"></script>
+
+<!-- Bootstrap table -->
+<script src="../../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<!-- Peity -->
+<!-- <script src="../../js/demo/bootstrap-table-demo.js"></script> -->
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/util/ajaxFactory.js"></script>
+<script src="../../js/util/crudVueFactory.js"></script>
+<script src="../../js/util/pageMe.js"></script>
+<script src="../../js/config/config.js"></script>
+<script src="../../js/plugins/layer/layer.min.js"></script>
+<script src="../../js/plugins/progressbar/init-mprogress.js"></script>
+<script src="../../js/plugins/progressbar/mprogress.js"></script>
+
+
+<script>
+
+    // 百度地图API功能
+    //GPS坐标
+    var x = 113.602805;
+    var y = 24.809714;
+    var ggPoint = new BMap.Point(x,y);
+
+    //地图初始化
+    var bm = new BMap.Map("allmap");
+    //bm.centerAndZoom(ggPoint, 15);
+    map.centerAndZoom("韶关",14);
+    bm.addControl(new BMap.NavigationControl());
+
+
+    var riding = new BMap.RidingRoute(bm, {
+        renderOptions: {
+            map: bm,
+            autoViewport: true
+        }
+    });
+    var start = new BMap.Point(113.310791, 24.003419);
+    var end = new BMap.Point(113.386419, 24.023519);
+    riding.search(start, end);
+
+    setTimeout(function(){
+        var convertor = new BMap.Convertor();
+        var pointArr = [];
+        pointArr.push(ggPoint);
+        convertor.translate(pointArr, 1, 5, translateCallback)
+    }, 1000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fence</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link href="../../css/bootstrap.min-custom.css" rel="stylesheet">
+    <link href="../../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../../css/animate.css" rel="stylesheet">
+    <link href="../../css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="../../css/plugins/pageMe/pageMe.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/mprogress.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/style.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=56qAN0woZGi81AtWMEmbZh8h8xpBuHYw"></script>
+    <!--加载鼠标绘制工具-->
+    <script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h5>地图中心</h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row row-lg">
+                <div class="clearfix hidden-xs"></div>
+                <div class="col-sm-8">
+                    <div class="example-wrap" >
+                        <div id="allmap" style="width:100%;height:500px"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <button type="button" class="btn btn-primary bl"  onclick="allGps()">生成坐标信息</button>
+                            <button type="button" class="btn btn-primary bl"  onclick="clearAll()">清除重建</button>
+                            <button type="button" class="btn btn-primary bl"  onclick="getCurrent()">当前定位</button>
+
+                        </div>
+                    </div>
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>新建围栏</h5>
+                        </div>
+                        <div class="ibox-content profile-content" id="regionModel">
+                            <div class="ibox-content">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="区域名称" required="true" v-model="name"/>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="设置颜色" required="required" v-model="color"/>
+                                </div>
+                                <div class="form-group">
+
+                                    <select class="form-control" id="type" ref="type" disabled="disabled" readonly="" >
+                                        <option value="">--请选择--</option>
+                                        <option value="1">多边形</option>
+                                        <option value="2">圆形</option>
+                                    </select>
+                                </div>
+                                <div id="app">
+                                        <input id="points" value="" type="text" hidden>
+                                    <div class="form-group" v-for='(list,value) in lists' :key='list.value'>
+                                        <input :value="list.value" name="point" type="text" class="form-control"  required=""  />
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary block full-width m-b" @click="regionDo()">上传</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<!-- 全局js -->
+<script src="../../js/jquery.min.js?v=2.1.4"></script>
+<script src="../../js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="../../js/content.js?v=1.0.0"></script>
+
+<!-- Bootstrap table -->
+<script src="../../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<!-- Peity -->
+<!-- <script src="../../js/demo/bootstrap-table-demo.js"></script> -->
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/util/ajaxFactory.js"></script>
+<script src="../../js/util/crudVueFactory.js"></script>
+<script src="../../js/util/pageMe.js"></script>
+<script src="../../js/config/config.js"></script>
+<script src="../../js/plugins/layer/layer.min.js"></script>
+<script src="../../js/plugins/progressbar/init-mprogress.js"></script>
+<script src="../../js/plugins/progressbar/mprogress.js"></script>
+<script>
+    //地图初始化
+    var bm = new BMap.Map("allmap");
+    bm.centerAndZoom("韶关",14);
+    bm.addControl(new BMap.NavigationControl());
+    //bm.enableScrollWheelZoom(false);
+    bm.enableInertialDragging();
+    bm.enableContinuousZoom();
+
+    // 定义一个控件类,即function
+    ZoomControl = function(){
+        // 默认停靠位置和偏移量
+        this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
+        this.defaultOffset = new BMap.Size(80, 20);
+    };
+    ZoomControl.prototype = new BMap.Control();
+    //覆盖物列表
+    var overlays = [];
+    //--------------------------右键菜单方法---------------------------
+    //删除动作方法
+    removeMarker = function(e,ee,marker){
+        bm.removeOverlay(marker);//地图删除覆盖物
+        delPoint(overlays,marker);//覆盖物列表删除此覆盖物
+    };
+    //坐标检测方法
+    checkMarker = function(e,ee,marker){
+        var lon=marker.getPosition().lng;
+        var lat=marker.getPosition().lat;
+        checkPointIn(lon,lat);
+    };
+    //开启多边形编辑
+    beginEdit = function(e,ee,marker){
+        marker.enableEditing();
+    };
+    //关闭多边形编辑
+    endEdit = function(e,ee,marker){
+        if(marker.point instanceof Object){
+            var r = marker.getRadius();
+            if(r>1000*10){
+                $.fn.alert("半径不能超过10千米");
+                return;
+            }
+        }else{
+            var tops=marker.getPath().length;
+            if(tops>30){//多边形边数限制
+                $.fn.alert("多边形最大不能超过30条边!");
+                return;
+            }
+        }
+
+        marker.disableEditing();
+    };
+    //todo--------添加标注
+    addLabel = function(e,ee,marker){
+
+    };
+    //右键菜单
+    getMenu = function(rectangle){
+        const markerMenu = new BMap.ContextMenu();
+        markerMenu.addItem(new BMap.MenuItem('删除区域',removeMarker.bind(rectangle)));//为菜单绑定事件
+        markerMenu.addItem(new BMap.MenuItem('开始编辑',beginEdit.bind(rectangle)));//为菜单绑定事件
+        markerMenu.addItem(new BMap.MenuItem('结束编辑',endEdit.bind(rectangle)));//为菜单绑定事件
+        return markerMenu;
+    };
+    //为覆盖物绑定方法
+    overlaycomplete = function(e){
+        var p = e.drawingMode;//获取覆盖物的属性
+
+        if(overlays.length==1){
+            alert("单次只能添加1个区域!");
+            bm.removeOverlay(e.overlay);
+            return;
+        }
+
+        if(p =='marker'){//是否是点
+            var markerMenu=new BMap.ContextMenu();//生成右键菜单
+            markerMenu.addItem(new BMap.MenuItem('检测此点坐标',checkMarker.bind(e.overlay)));//为菜单绑定事件
+            markerMenu.addItem(new BMap.MenuItem('删除',removeMarker.bind(e.overlay)));//为菜单绑定事件
+            e.overlay.addContextMenu(markerMenu);//覆盖物绑定菜单
+        }else if(p =='circle'){ // 圆
+            var r = e.overlay.getRadius();
+            if(r>1000*10){
+                $.fn.alert("半径不能超过10千米");
+                bm.removeOverlay(e.overlay);
+                return;
+
+            } else if(r<5){ // 半径小于5米认为图形无效
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+
+        } else if (p == 'rectangle') { // 矩形
+
+            // 如果两点重合则视为无效
+            if (JSON.stringify(e.overlay.getPath()[0]) == JSON.stringify(e.overlay.getPath()[1])) {
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+
+        } else { // 多边形
+            if(e.overlay.getPath().length>30){//多边形边数限制
+                $.fn.alert("多边形最大不能超过30条边!");
+                bm.removeOverlay(e.overlay);
+                return;
+            } else if (e.overlay.getPath().length<3) {
+                bm.removeOverlay(e.overlay);
+                return;
+            }
+            overlays.push(e.overlay);//覆盖物列表添加覆盖物
+            //添加右键菜单
+            e.overlay.addContextMenu(getMenu(e.overlay));//覆盖物绑定菜单
+        }
+    };
+
+    //图形样式
+    var styleOptions = {
+        strokeColor:"red",    //边线颜色。
+        //fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    };
+    //实例化鼠标绘制工具
+    var drawingManager = new BMapLib.DrawingManager(bm, {
+        isOpen: false, //是否开启绘制模式
+        enableDrawingTool: true, //是否显示工具栏
+        drawingToolOptions: {
+            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+            offset: new BMap.Size(5, 5), //偏离值
+            //显示哪些绘制工具(BMAP_DRAWING_MARKER:点,BMAP_DRAWING_CIRCLE:圆,BMAP_DRAWING_POLYLINE:折线,BMAP_DRAWING_POLYGON:多边形,BMAP_DRAWING_RECTANGLE:矩形)
+            drawingModes:[BMAP_DRAWING_RECTANGLE,BMAP_DRAWING_POLYGON,BMAP_DRAWING_CIRCLE],
+            drawingTypes:[BMAP_DRAWING_RECTANGLE,BMAP_DRAWING_POLYGON,BMAP_DRAWING_CIRCLE]
+        }
+        //,
+        //circleOptions: styleOptions, //圆的样式
+        // polylineOptions: styleOptions, //线的样式
+        // polygonOptions: styleOptions, //多边形的样式
+        // rectangleOptions: styleOptions //矩形的样式
+    });
+    //添加鼠标绘制工具监听事件，用于获取绘制结果
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+</script>
+<script>
+    //清除所有覆盖物
+    function clearAll() {
+        for(var i = 0; i < overlays.length; i++){
+            bm.removeOverlay(overlays[i]);//循环清除
+        }
+        overlays.length = 0;
+        vm.delAll();
+    }
+    //提交方法
+    function allGps(){
+        if(overlays.length==0){
+
+            return;
+        }
+        var points=[];//区域数组
+        for (var a = 0; a < overlays.length; a++) {
+            //var type=overlays[a].wQ;
+            //var type=Object.getPrototypeOf(overlays[a]).wQ;
+            //if(type=='Circle'){
+            if(overlays[a].point instanceof Object){
+                var str=""+overlays[a].getCenter().lng+"_"+overlays[a].getCenter().lat+"_"+overlays[a].getRadius();
+                var centerpoint =overlays[a].getCenter().lng+"_"+overlays[a].getCenter().lat;
+
+
+                $("#type").val(2);
+                vm.addNewList(centerpoint);
+                vm.addNewList(overlays[a].getRadius());
+
+            }else{
+                var ov=overlays[a].getPath();//单个覆盖物
+                var str="";
+                for (var t = 0; t < ov.length; t++) {
+                    //循环添加各定点的横纵坐标
+                    $("#type").val(1);
+                    var inputstr =ov[t].lng+"_"+ov[t].lat;
+                    vm.addNewList(inputstr);
+                    if(t==(ov.length-1)){
+                        str+=ov[t].lng+"_"+ov[t].lat;
+
+
+
+                    }else{
+                        str+=ov[t].lng+"_"+ov[t].lat+";";
+                    }
+                }
+            }
+
+            points.push(str);//将坐标系添加到区域数组
+            $("#points").val(points);
+        }
+        //alert(points);
+        // return points;
+        //uploadPoint(points);//上传区域坐标系
+
+    }
+    //上传区域坐标系
+    function uploadPoint(points){
+        var url_= basePath+"/uploadPoint?pointString="+points;
+        $.ajax({
+            type: "POST",
+            url: url_,
+            success:function(data){
+                if(data=="success"){
+                    alert("提交成功");
+                }
+            }
+        });
+    }
+
+    var vm = new Vue({
+        el: '#regionModel',
+        data: {
+            lists: [],
+            name:'',
+            color:''
+        },
+        methods: {
+            regionDo :function () {
+                var that = this;
+                if(that.name == ""){
+                    $('.form-group').eq(0).addClass('has-warning');
+                    alert("先设置名称");
+                    throw SyntaxError(); //如果验证不通过，则不执行后面
+                }
+                if(this.$refs.type.value == "" ||this.$refs.type.value==undefined){
+                    alert("未完成绘制,坐标为空");
+                    throw SyntaxError(); //如果验证不通过，则不执行后面
+                }
+                $z.ajaxStrAndJson({
+                    url: basePath + "/region/addMap",
+                    data: {
+                        regionEntity:{
+                            name:that.name,
+                            type:this.$refs.type.value,
+                            color:that.color
+                        },
+                        archorEntity:{
+                            name:$('#points').val()
+                        }
+                    },
+                    success: function(data) {
+                        $z.dealCommonResult(data, function () {
+                            layer.alert("<em style='color:black'>" + "添加成功！" + "</em>", {
+                                icon: 6,
+                                offset: "200px",
+                                title: '提示'
+                            });
+                        });
+                    }
+                });
+            },
+            addNewList: function(archor) {
+                this.lists.push({
+                    // id: this.nextTodoId++,
+                    value : archor
+                })
+            },
+            delAll: function() {
+                this.lists.splice(0,this.lists.length);
+            }
+        }
+    });
+
+
+    sendPoint = function (points) {
+        var that = this;
+        $z.ajaxStrAndJson({
+            url: basePath + "/region/",
+            data: {
+                login: that.login,
+                passwd: that.passwd
+            },
+            success: function(data) {
+                $z.dealCommonResult(data, function() {
+                    //如果点了记住我，则存储到本地
+                    if (that.rememberMe) {
+                        localStorage.setItem("user", JSON.stringify({
+                            userName: that.login,
+                            password: that.passwd
+                        }));
+                    }
+                    window.location.href = "home.html";
+                });
+
+
+
+            }
+        });
+
+    }
+
+    getCurrent = function () {
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r){
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+
+                alert('您的位置：'+r.point.lng+','+r.point.lat);
+                //alert("定位成功！", r.point.lng+','+r.point.lat, "success");
+            }
+            else {
+                alert('failed'+this.getStatus());
+            }
+        });
+    }
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fence</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link href="../../css/bootstrap.min-custom.css" rel="stylesheet">
+    <link href="../../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../../css/animate.css" rel="stylesheet">
+    <link href="../../css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="../../css/plugins/pageMe/pageMe.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/mprogress.css" rel="stylesheet" />
+    <link href="../../css/plugins/progressbar/style.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=56qAN0woZGi81AtWMEmbZh8h8xpBuHYw"></script>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h5>地图中心</h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row row-lg">
+                <div class="clearfix hidden-xs"></div>
+                <div class="col-sm-2">
+                    <div class="chat-users" >
+                        <div class="users-list" id="userList">
+
+                            <div class="chat-user" v-for="(list,value) in lists" :key="list.value">
+                                <span class="pull-right label label-primary" v-if="list.value.status == 11" >在线</span>
+                                <div class="chat-user-name">
+                                    <a href="javascript:;" @click="getUserPoint(list.value.id)">{{list.value.name}}</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    <div class="example-wrap" >
+                        <div id="queryModel">
+                            <div id="message"></div>
+                            <h4>当前在线人数:</h4>
+                        </div>
+                        <div id="allmap" style="width:100%;height:500px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<!-- 全局js -->
+<script src="../../js/jquery.min.js?v=2.1.4"></script>
+<script src="../../js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="../../js/content.js?v=1.0.0"></script>
+
+<!-- Bootstrap table -->
+<script src="../../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="../../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<!-- Peity -->
+<!-- <script src="../../js/demo/bootstrap-table-demo.js"></script> -->
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/util/ajaxFactory.js"></script>
+<script src="../../js/util/crudVueFactory.js"></script>
+<script src="../../js/util/pageMe.js"></script>
+<script src="../../js/config/config.js"></script>
+<script src="../../js/plugins/layer/layer.min.js"></script>
+<script src="../../js/plugins/progressbar/init-mprogress.js"></script>
+<script src="../../js/plugins/progressbar/mprogress.js"></script>
+<script src="../../js/plugins/mustache/mustache.js"></script>
+
+<script>
+
+    // 百度地图API功能
+    //GPS坐标
+    var x = 113.602805;
+    var y = 24.809714;
+    var ggPoint = new BMap.Point(x,y);
+
+    //地图初始化
+    var bm = new BMap.Map("allmap");
+    bm.centerAndZoom(ggPoint, 15);
+    bm.addControl(new BMap.NavigationControl());
+
+
+
+    //坐标转换完之后的回调函数
+    translateCallback = function (data){
+        if(data.status === 0) {
+
+            bm.setCenter(data.points[0]);
+        }
+    }
+
+    setTimeout(function(){
+        var convertor = new BMap.Convertor();
+        var pointArr = [];
+        pointArr.push(ggPoint);
+        convertor.translate(pointArr, 1, 5, translateCallback)
+    }, 1000);
+</script>
+<script>
+    var currentPage = 1;
+    var totalPage;
+    var sqlMap = {};
+    //排序的数据
+    var orderData = [];
+    var controllerPrefix = "user";
+    var methodName = "likeSelect";
+    var userId;
+
+    var userlistVue = new Vue({
+        el : '#userList',
+        data : {
+            lists : []
+        },
+        mounted: function() {
+            var that=this;
+            sqlMap.currentPage = currentPage;
+            sqlMap.orderData = orderData;
+            $z.ajaxStrAndJson({
+
+                    url : basePath + "/user/likeSelect",
+                    data : sqlMap,
+                success : function(data) {
+                    data = data.data;
+                    for(var i = 0; i < data.result.length; i++){
+
+                        that.lists.push({value :data.result[i]});
+                    }
+                }
+            });
+        },
+        methods :{
+            getUserPoint :function (uid) {
+                $z.ajaxStrAndJson({
+                    url : basePath + "/socket/getUserPoint",
+                    data :{
+                        id:uid
+                    } ,
+                    success : function(data) {
+                        //回传目标用户的定位信息
+                        //在地图中完成标注和 定位居中
+                    }
+                });
+
+            }
+        }
+
+    });
+    function makeResult(data) {
+        for (var i = 0; i < data.length; i++) {
+            if (data[i] == null) {
+                data[i] = {};
+                data[i]["id"] = "无";
+                data[i]["login"] = "无";
+                data[i]["name"] = "无";
+                data[i]["passwd"] = "无";
+                data[i]["sex"] = "无";
+                data[i]["phone"] = "无";
+                data[i]["birthday"] = "无";
+                data[i]["logintime"] = "无";
+                data[i]["logoutime"] = "无";
+                data[i]["status"] = "无";
+                data[i]["dpid"] = "无";
+                data[i]["lng"] = "无";
+                data[i]["lat"] = "无";
+            }
+            if(data[i]["sex"] == "1") {
+                data[i]["sex"] = "女";
+            }
+            if(data[i]["sex"] == "0") {
+                data[i]["sex"] = "男";
+            }
+        }
+    }
+</script>
+<script>
+    var websocket = null;
+    //判断当前浏览器是否支持WebSocket
+    if('WebSocket' in window){
+        websocket = new WebSocket("ws://localhost:8099/fence/websocket/9999");
+    }
+    else{
+        alert('Not support websocket')
+    }
+    //连接发生错误的回调方法
+    websocket.onerror = function(){
+        setMessageInnerHTML("error");
+    };
+    //连接成功建立的回调方法
+    websocket.onopen = function(event){
+        setMessageInnerHTML("open");
+    }
+
+    //接收到消息的回调方法
+    websocket.onmessage = function(event){
+        setMessageInnerHTML(event.data);
+    }
+
+    //连接关闭的回调方法
+    websocket.onclose = function(){
+        setMessageInnerHTML("close");
+    }
+
+    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = function(){
+        websocket.close();
+    }
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML){
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+    //关闭连接
+    function closeWebSocket(){
+        websocket.close();
+    }
+
+    //发送消息
+    function send(message){
+        websocket.send(message);
+    }</script>
+</body>
+</html>
